@@ -1,25 +1,240 @@
-# Object detection using TensorFlow Lite on Android
-### Overview
-This is an android app for object detection using [TensorFlow Lite](https://www.tensorflow.org/lite) on a mobile device. I have used a pretrained MobileNet SSD quantized model from [here](https://storage.googleapis.com/download.tensorflow.org/models/tflite/coco_ssd_mobilenet_v1_1.0_quant_2018_06_29.zip). It is  trained on the ImageNet dataset which can detect about 90 classes including banana, scissors, laptop, remote, vase etc. The main issue faced earlier of object detection on mobile is that the models are often too big to run. Tensorflow Lite solves this problem by providing a lightweight solution to run machine learning models on mobile. You can see [here](https://drive.google.com/file/d/0B_1Jj2xWSEEWd1FTdlkyZkZBYzQtMm82WlpHZGwxYVY5ZG9v/view?usp=sharing&resourcekey=0-spgBkTLo6ggcdCQZ0O6tSw) yourself how nicely the app works and detects multiple objects quickly.
+# Object Detection App - TensorFlow Lite Android
+
+[![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com/)
+[![TensorFlow Lite](https://img.shields.io/badge/TensorFlow-Lite-orange.svg)](https://www.tensorflow.org/lite)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)](https://kotlinlang.org/)
+
+## Overview
+
+Real-time object detection Android app using TensorFlow Lite with MobileNet SSD v1 quantized model. Detects 90+ object classes from the COCO dataset with bounding boxes and confidence scores.
+
+**Features:** Real-time detection • Lightweight TFLite inference • GPU acceleration • 90+ COCO classes
+
+## Tech Stack
+
+- **Language:** Kotlin
+- **Build:** Gradle 8.5 • Android Gradle Plugin 8.2.0
+- **SDK:** Min 24 (Android 7.0) • Target 35 (Android 14) • Compile 35
+- **Java:** JDK 17
+- **ML:** TensorFlow Lite 2.14.0 (with GPU & Support libraries)
+- **AndroidX:** AppCompat 1.6.1 • ConstraintLayout 2.1.4 • Core-KTX 1.12.0
+- **Model:** MobileNet SSD v1 Quantized (COCO trained)
+
+## Quick Start
+
+### Prerequisites
+
+- Android Studio (Hedgehog or later)
+- JDK 17+
+- Android device/emulator with API 24+ and camera
+
+### Installation & Setup
+
+#### Method 1: Using Android Studio (Recommended)
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd ObjectDetectionApp-master
+   ```
+
+2. **Open in Android Studio**
+
+   - Launch Android Studio
+   - Select `File → Open`
+   - Navigate to and select the project root directory
+
+3. **Sync Gradle**
+
+   - Android Studio will automatically prompt to sync
+   - Or manually: `File → Sync Project with Gradle Files`
+   - Wait for dependencies to download (first time may take several minutes)
+
+4. **Connect your Android device or start an emulator**
+
+   - Enable USB debugging on your device (Settings → Developer Options)
+   - Or create an emulator: `Tools → Device Manager → Create Device`
+
+5. **Run the application**
+   - Click the green "Run" button (▶️) in the toolbar
+   - Or press `Shift+F10` (Windows/Linux) / `Ctrl+R` (Mac)
+   - Select your device/emulator when prompted
+
+#### Method 2: Using Command Line
+
+1. **Navigate to project directory**
+
+   ```powershell
+   cd "c:\path\to\ObjectDetectionApp-master"
+   ```
+
+2. **Build the debug APK**
+
+   ```powershell
+   .\gradlew.bat assembleDebug
+   ```
+
+   Output location: `app\build\outputs\apk\debug\app-debug.apk`
+
+3. **Install on connected device**
+
+   ```powershell
+   .\gradlew.bat installDebug
+   ```
+
+4. **Alternative: Build release APK**
+   ```powershell
+   .\gradlew.bat assembleRelease
+   ```
+   Output location: `app\build\outputs\apk\release\app-release-unsigned.apk`
+
+### Running the App
+
+1. **Grant Camera Permission**
+
+   - On first launch, the app will request camera permission
+   - Tap "Allow" to enable object detection
+
+2. **Start Detection**
+
+   - Point your camera at objects
+   - Detected objects will be highlighted with bounding boxes
+   - Confidence scores are displayed for each detection
+
+3. **Supported Objects**
+   - 90+ classes including: person, bicycle, car, motorcycle, bottle, cup, fork, knife, banana, apple, laptop, mouse, keyboard, cell phone, microwave, oven, scissors, teddy bear, and more
+
+## 🧪 Testing
+
+Run unit tests:
+
+```powershell
+.\gradlew.bat test
+```
+
+Run instrumented tests (requires connected device):
+
+```powershell
+.\gradlew.bat connectedAndroidTest
+```
+
+## 🏗️ Building from Scratch
+
+If you need to clean and rebuild:
+
+```powershell
+# Clean previous builds
+.\gradlew.bat clean
+
+# Build fresh
+.\gradlew.bat assembleDebug
+
+# Or build with dependency refresh
+.\gradlew.bat clean build --refresh-dependencies
+```
+
+## 🧠 How It Works
 
 ### TensorFlow Lite Model
-TensorFlow Lite is not designed to train a model, the model can be trained on a higher power device. Then, the pretrained model can be converted to a TensorFlow Lite format (.tflite), which has a smaller footprint than can be easily run on a mobile or other embedded devices for classification, regresion or other such tasks. The model (.tflite) file and the class labels (.txt) file need to be placed in the [assets](https://github.com/mrinalTheCoder/ObjectDetectionApp/tree/master/app/src/main/assets) folder of the android app.
 
-### The Android App for Object Detection
-I have followed the [TensorFlow Lite example for Object Detection](https://github.com/tensorflow/examples/tree/master/lite/examples/object_detection).
-In this app we will get a running feed from the mobile device camera, then, run object detection on the frame in background, and then overlay the results of object detection on the frame with a bounding box.<br/><br/>
-First step here is to create an android app using Android Studio. My main Activity is [MainActivity](https://github.com/mrinalTheCoder/ObjectDetectionApp/blob/master/app/src/main/java/com/objdetector/MainActivity.java) which will invoke the object detector. It extends the [CameraActivity](https://github.com/mrinalTheCoder/ObjectDetectionApp/blob/master/app/src/main/java/com/objdetector/CameraActivity.java) which in turn uses a [CameraConnectionFragment](https://github.com/mrinalTheCoder/ObjectDetectionApp/blob/master/app/src/main/java/com/objdetector/CameraConnectionFragment.java) to manage all camera related stuff.<br/><br/>
-The object detector is encapsulated by [MobileNetObjDetector](https://github.com/mrinalTheCoder/ObjectDetectionApp/blob/master/app/src/main/java/com/objdetector/deepmodel/MobileNetObjDetector.java) which uses the [TensorFlow Lite Interpreter](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).<br/><br/>
-`import org.tensorflow.lite.Interpreter;`<br/><br/>
-Its very easy to initialize the Interpreter with the model:<br/><br/>
-`private Interpreter tflite;
-tfLite = new Interpreter(loadModelFile(assetManager));`<br/><br/>
-For object detection, it feeds an image of size 300x300 to the model and obtains the output as defined by the model.<br/><br/>
-`tfLite.runForMultipleInputsOutputs(inputArray, outputMap);`<br/><br/>
-Then the `MobileNetObjDetector` convertes the `outputMap` into a List of [DetectionResult](https://github.com/mrinalTheCoder/ObjectDetectionApp/blob/master/app/src/main/java/com/objdetector/deepmodel/DetectionResult.java) which can be easily consumed for painting the overlay. Each `DetectionResult` has the label detected, the confidence score of the detection and the bounding box of the detection.<br/><br/>
-The [OverlayView](https://github.com/mrinalTheCoder/ObjectDetectionApp/blob/master/app/src/main/java/com/objdetector/customview/OverlayView.java) takes care of resizing the bounding bozes as per the mobile device screen preview size and render it on top of the camera frame.
+The app uses a pretrained **MobileNet SSD v1** quantized model optimized for mobile devices:
 
-### Results
+- Model file: `detect.tflite` (stored in `app/src/main/assets`)
+- Labels: `labelmap.txt` (90 object classes)
+- Input: 300x300 RGB image
+- Output: Bounding boxes, class labels, and confidence scores
+- **Trained on:** COCO dataset (Common Objects in Context)
+
+**Official Model Sources:**
+
+- Original model download: [COCO SSD MobileNet v1 Quantized](https://storage.googleapis.com/download.tensorflow.org/models/tflite/coco_ssd_mobilenet_v1_1.0_quant_2018_06_29.zip)
+- TensorFlow Model Zoo: [TF1 Detection Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1_detection_zoo.md)
+- More TFLite models: [TensorFlow Lite Models](https://ai.google.dev/edge/litert/models/trained)
+
+TensorFlow Lite provides a lightweight solution for running ML models on mobile devices without requiring a connection to cloud services.
+
+> **Note:** The model files (`detect.tflite` and `labelmap.txt`) are already included in the project's `app/src/main/assets` folder. You only need to download the model if you want to replace it or use a different version.
+
+### Architecture Overview
+
+1. **Camera Feed:** `CameraActivity` and `CameraConnectionFragment` manage real-time camera input
+
+2. **Object Detection:** `MobileNetObjDetector` wraps the TensorFlow Lite Interpreter:
+
+   ```kotlin
+   import org.tensorflow.lite.Interpreter
+
+   private val tflite = Interpreter(loadModelFile(assetManager))
+   tflite.runForMultipleInputsOutputs(inputArray, outputMap)
+   ```
+
+3. **Results Processing:** Converts model output to `DetectionResult` objects containing:
+
+   - Detected class label
+   - Confidence score (0-1)
+   - Bounding box coordinates
+
+4. **Visualization:** `OverlayView` renders bounding boxes and labels on top of the camera preview
+
+## 🛠️ Troubleshooting
+
+### Gradle Sync Issues
+
+```powershell
+.\gradlew.bat clean build --refresh-dependencies
+```
+
+### App Crashes on Launch
+
+- Ensure camera permissions are granted
+- Verify device meets minimum SDK requirements (API 24+)
+- Check that `detect.tflite` and `labelmap.txt` exist in assets folder
+
+### Model Not Found Error
+
+The build script verifies model files exist. If you see this error:
+
+- Ensure `app/src/main/assets/detect.tflite` exists
+- Ensure `app/src/main/assets/labelmap.txt` exists
+
+### Performance Issues
+
+- Enable GPU acceleration (already configured in dependencies)
+- Test on a physical device rather than emulator for better performance
+
+## 📦 Dependencies
+
+Key dependencies (see `app/build.gradle` for complete list):
+
+- `androidx.appcompat:appcompat:1.6.1`
+- `org.tensorflow:tensorflow-lite:2.14.0`
+- `org.tensorflow:tensorflow-lite-gpu:2.14.0`
+- `org.tensorflow:tensorflow-lite-support:0.4.4`
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## 📝 License
+
+See [license.txt](license.txt) for details.
+
+## 🙏 Acknowledgments
+
+- Based on [TensorFlow Lite Object Detection Example](https://github.com/tensorflow/examples/tree/master/lite/examples/object_detection)
+- MobileNet SSD model from [TensorFlow Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1_detection_zoo.md)
+
+## 📧 Support
+
+For issues, questions, or contributions, please open an issue on GitHub.
+
+## 📸 Results
+
 Dining Table with Cups<br/>
 <img src="results/cups.jpg" width="335" height="730" />
 
@@ -28,5 +243,3 @@ Dining Table with Cups<br/>
 
 <br/><br/>Microwave<br/>
 <img src="results/microwave.jpg" width="335" height="730" />
-
-<br/><br/>Checkout more in a video [here](https://drive.google.com/file/d/0B_1Jj2xWSEEWd1FTdlkyZkZBYzQtMm82WlpHZGwxYVY5ZG9v/view?usp=sharing)
